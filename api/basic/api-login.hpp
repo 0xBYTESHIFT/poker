@@ -1,5 +1,5 @@
 #pragma once
-#include "api/json_obj.h"
+#include "api/json.hpp"
 #include "api/val_t.hpp"
 #include "components/tracy_include.hpp"
 
@@ -10,8 +10,8 @@ namespace api {
         prop_val<std::string> email{"email", ""};
         prop_val<std::string> pass_hash{"pass", ""};
 
-        static auto from_json(const json& j) -> login_request;
-        auto to_json() const -> json;
+        static auto from_json(const json_t& j) -> login_request;
+        auto to_json() const -> json_t;
     };
 
     struct login_response {
@@ -26,25 +26,26 @@ namespace api {
         prop_val<std::string> token{"token", ""};
         prop_val<code_enum> code{"code", code_enum::ETC};
 
-        static auto from_json(const json& j) -> login_response;
-        auto to_json() const -> json;
+        static auto from_json(const json_t& j) -> login_response;
+        auto to_json() const -> json_t;
     };
 
-    inline auto login_request::from_json(const json& j) -> login_request {
+    inline auto login_request::from_json(const json_t& j) -> login_request {
         ZoneScoped;
         login_request req;
         read_from_json(j, req.email);
         read_from_json(j, req.pass_hash);
         return req;
     }
-    inline auto login_request::to_json() const -> json {
+    inline auto login_request::to_json() const -> json_t {
         ZoneScoped;
-        json j;
+        json_t j;
+        write_to_json(j, type);
         write_to_json(j, email);
         write_to_json(j, pass_hash);
         return j;
     }
-    inline auto login_response::from_json(const json& j) -> login_response {
+    inline auto login_response::from_json(const json_t& j) -> login_response {
         ZoneScoped;
         login_response rsp;
         read_from_json(j, rsp.message);
@@ -52,9 +53,10 @@ namespace api {
         read_from_json(j, rsp.code);
         return rsp;
     }
-    inline auto login_response::to_json() const -> json {
+    inline auto login_response::to_json() const -> json_t {
         ZoneScoped;
-        json j;
+        json_t j;
+        write_to_json(j, type);
         write_to_json(j, message);
         write_to_json(j, token);
         write_to_json(j, code);

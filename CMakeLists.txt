@@ -23,8 +23,6 @@ endif ()
 option(USE_TRACY "code profiling" ON)
 option(CONAN_EXPERIMENTAL_INCLUDE "CONAN EXPERIMENT INCLUDE" ON)
 
-include(cmake/CPM.cmake)
-
 if ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
     add_compile_options(
             #-Werror
@@ -84,5 +82,5 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic -lm")
 add_compile_definitions(RAPIDJSON_HAS_STDSTRING=1)
 
 add_subdirectory(client)
-#add_subdirectory(tests)
+add_subdirectory(tests)
 add_subdirectory(service)

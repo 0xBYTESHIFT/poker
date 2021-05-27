@@ -2,6 +2,7 @@
 #include "db_worker/db_worker.h"
 #include "manager/manager.hpp"
 #include "server.hpp"
+#include <exception>
 #include <random>
 
 server::server(actor_zeta::intrusive_ptr<manager> ptr)
@@ -15,49 +16,55 @@ server::server(actor_zeta::intrusive_ptr<manager> ptr)
     add_handler(db_worker::cb_name_unregister(), &server::on_db_unregister_response);
 }
 
-auto server::handle_request(ge::actor_address sender, session_id id, json& j_) -> void {
+auto server::handle_request(ge::actor_address sender, session_id id, json_t& j_) -> void {
     constexpr auto prefix = "server::handle_request";
     ZoneScopedN(prefix);
     log_.trace("{}", prefix);
     auto j = std::move(j_);
 
     json::error_code ec;
-    auto type = j.value_as<std::string>("type");
-    auto db_addr = addresses("db_worker");
-    if (type == api::register_request::type()()) {
-        auto req = api::register_request::from_json(j.dump());
-        senders_[id] = sender;
-        ge::send(db_addr, self(), db_worker::name_process_register(), self(), id, std::move(req));
-    } else if (type == api::unregister_request::type()()) {
-        auto req = api::unregister_request::from_json(j.dump());
-        senders_[id] = sender;
-        pending_unregs_[id] = req;
-        ge::send(db_addr, self(), db_worker::name_process_unregister(), self(), id, std::move(req));
-    } else if (type == api::login_request::type()()) {
-        auto req = api::login_request::from_json(j.dump());
-        senders_[id] = sender;
-        pending_logins_[id] = req;
-        ge::send(db_addr, self(), db_worker::name_process_login(), self(), id, std::move(req));
-    } else if (type == api::unlogin_request::type()()) {
-        auto req = api::unlogin_request::from_json(j);
-        process_unlogin_(req, id, sender);
-    } else if (type == api::new_room_request::type().downcast()) {
-        auto req = api::new_room_request::from_json(j);
-        process_new_room_(req, id, sender);
-    } else if (type == api::enter_room_request::type().downcast()) {
-        auto req = api::enter_room_request::from_json(j);
-        process_enter_room_(req, id, sender);
-    } else if (type == api::leave_room_request::type().downcast()) {
-        auto req = api::leave_room_request::from_json(j);
-        process_leave_room_(req, id, sender);
-    } else if (type == api::del_room_request::type().downcast()) {
-        auto req = api::del_room_request::from_json(j);
-        process_del_room_(req, id, sender);
-    } else if (type == api::list_rooms_request::type().downcast()) {
-        auto req = api::list_rooms_request::from_json(j);
-        process_list_room_(req, id, sender);
-    } else {
-        //send error
+    try {
+        auto type = json::read<std::string>(j, "type");
+        auto db_addr = addresses("db_worker");
+        if (type == api::register_request::type()()) {
+            auto req = api::register_request::from_json(j);
+            senders_[id] = sender;
+            ge::send(db_addr, self(), db_worker::name_process_register(), self(), id, std::move(req));
+        } else if (type == api::unregister_request::type()()) {
+            auto req = api::unregister_request::from_json(j);
+            senders_[id] = sender;
+            pending_unregs_[id] = req;
+            ge::send(db_addr, self(), db_worker::name_process_unregister(), self(), id, std::move(req));
+        } else if (type == api::login_request::type()()) {
+            auto req = api::login_request::from_json(j);
+            senders_[id] = sender;
+            pending_logins_[id] = req;
+            ge::send(db_addr, self(), db_worker::name_process_login(), self(), id, std::move(req));
+        } else if (type == api::unlogin_request::type()()) {
+            auto req = api::unlogin_request::from_json(j);
+            process_unlogin_(req, id, sender);
+        } else if (type == api::new_room_request::type().downcast()) {
+            auto req = api::new_room_request::from_json(j);
+            process_new_room_(req, id, sender);
+        } else if (type == api::enter_room_request::type().downcast()) {
+            auto req = api::enter_room_request::from_json(j);
+            process_enter_room_(req, id, sender);
+        } else if (type == api::leave_room_request::type().downcast()) {
+            auto req = api::leave_room_request::from_json(j);
+            process_leave_room_(req, id, sender);
+        } else if (type == api::del_room_request::type().downcast()) {
+            auto req = api::del_room_request::from_json(j);
+            process_del_room_(req, id, sender);
+        } else if (type == api::list_rooms_request::type().downcast()) {
+            auto req = api::list_rooms_request::from_json(j);
+            process_list_room_(req, id, sender);
+        } else {
+            //send error
+        }
+    } catch (std::exception& e) {
+        auto mes = fmt::format("{} error: {}", prefix, e.what());
+        log_.error(mes);
+        ge::send(sender, self(), cb_name_error, id, std::move(mes));
     }
 }
 
@@ -72,16 +79,16 @@ void server::on_db_login_response(session_id id, api::login_response& rsp_) {
         return;
     }
     auto& sender = it->second;
-    if (rsp.code == api::login_response::code_enum::OK) {
+    if (rsp.code()() == api::login_response::code_enum::OK) {
         auto token = gen_token_();
         rsp.token = token;
         auto u = std::make_shared<user>();
         u->token() = token;
-        u->email() = pending_logins_.at(id).email;
-        u->pass_hash() = pending_logins_.at(id).pass_hash;
+        u->email() = pending_logins_.at(id).email();
+        u->pass_hash() = pending_logins_.at(id).pass_hash();
         users_[token] = std::move(u);
     }
-    ge::send(sender, self(), cb_name_login(), id, std::move(rsp));
+    ge::send(sender, self(), cb_name_login, id, std::move(rsp));
     senders_.erase(id);
     pending_logins_.erase(id);
 }
@@ -97,7 +104,7 @@ void server::on_db_register_response(session_id id, api::register_response& rsp_
         return;
     }
     auto& sender = it->second;
-    ge::send(sender, self(), cb_name_register(), id, std::move(rsp));
+    ge::send(sender, self(), cb_name_register, id, std::move(rsp));
     senders_.erase(id);
 }
 
@@ -112,9 +119,9 @@ void server::on_db_unregister_response(session_id id, api::unregister_response& 
         return;
     }
     auto& sender = it->second;
-    if (rsp.code == api::unregister_response::code_enum::OK) {
+    if (rsp.code()() == api::unregister_response::code_enum::OK) {
         auto unreg = pending_unregs_.at(id);
-        auto& user_token = unreg.token;
+        auto& user_token = unreg.token()();
         for (auto& [room_token, room_ptr] : rooms_) {
             auto& users = room_ptr->users();
             auto room_user_it = users.find(user_token);
@@ -129,7 +136,7 @@ void server::on_db_unregister_response(session_id id, api::unregister_response& 
         }
         users_.erase(user_token);
     }
-    ge::send(sender, self(), cb_name_unregister(), id, std::move(rsp));
+    ge::send(sender, self(), cb_name_unregister, id, std::move(rsp));
     pending_unregs_.erase(id);
     senders_.erase(id);
 }
@@ -176,8 +183,8 @@ void server::process_unlogin_(const api::unlogin_request& req, session_id id, ge
     constexpr auto prefix = "server::process_unlogin_";
     ZoneScopedN(prefix);
     log_.trace("{}", prefix);
-    auto& user_token = req.token;
-    auto it = check_user<api::unlogin_response>(sender, req, id, user_token, cb_name_unlogin());
+    auto& user_token = req.token()();
+    auto it = check_user<api::unlogin_response>(sender, req, id, user_token, cb_name_unlogin);
     if (it == users_.end()) {
         return;
     }
@@ -196,6 +203,6 @@ void server::process_unlogin_(const api::unlogin_request& req, session_id id, ge
         }
         break;
     }
-    users_.erase(req.token);
-    ge::send(sender, self(), cb_name_unlogin(), id, std::move(rsp));
+    users_.erase(req.token()());
+    ge::send(sender, self(), cb_name_unlogin, id, std::move(rsp));
 }

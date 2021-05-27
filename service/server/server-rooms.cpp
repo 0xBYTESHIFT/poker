@@ -5,7 +5,7 @@ void server::process_new_room_(const api::new_room_request& req, session_id id, 
     ZoneScopedN(prefix);
     log_.trace(prefix);
     auto& user_token = req.token().downcast();
-    auto it = check_user<api::new_room_response>(sender, req, id, user_token, cb_name_new_room());
+    auto it = check_user<api::new_room_response>(sender, req, id, user_token, cb_name_new_room);
     if (it == users_.end()) {
         return;
     }
@@ -17,7 +17,7 @@ void server::process_new_room_(const api::new_room_request& req, session_id id, 
     rsp.code() = api::new_room_response::code_enum::OK;
     rsp.message() = "ok";
     rsp.room_token() = r->token();
-    ge::send(sender, self(), cb_name_new_room(), id, std::move(rsp));
+    ge::send(sender, self(), cb_name_new_room, id, std::move(rsp));
 }
 
 void server::process_enter_room_(const api::enter_room_request& req, session_id id, ge::actor_address sender) {
@@ -25,7 +25,7 @@ void server::process_enter_room_(const api::enter_room_request& req, session_id 
     ZoneScopedN(prefix);
     log_.trace(prefix);
     auto user_token = req.token().downcast();
-    auto it = check_user<api::enter_room_response>(sender, req, id, user_token, cb_name_enter_room());
+    auto it = check_user<api::enter_room_response>(sender, req, id, user_token, cb_name_enter_room);
     if (it == users_.end()) {
         return;
     }
@@ -40,7 +40,7 @@ void server::process_enter_room_(const api::enter_room_request& req, session_id 
         rsp.message() = "ok";
         room_it->second->users().emplace(user_token, user_ptr);
     }
-    ge::send(sender, self(), cb_name_enter_room(), id, std::move(rsp));
+    ge::send(sender, self(), cb_name_enter_room, id, std::move(rsp));
 }
 
 void server::process_leave_room_(const api::leave_room_request& req, session_id id, ge::actor_address sender) {
@@ -49,7 +49,7 @@ void server::process_leave_room_(const api::leave_room_request& req, session_id 
     log_.trace(prefix);
     auto& room_token = req.room_token().downcast();
     auto& user_token = req.token().downcast();
-    auto it = check_user<api::leave_room_response>(sender, req, id, user_token, cb_name_leave_room());
+    auto it = check_user<api::leave_room_response>(sender, req, id, user_token, cb_name_leave_room);
     if (it == users_.end()) {
         return;
     }
@@ -75,7 +75,7 @@ void server::process_leave_room_(const api::leave_room_request& req, session_id 
             }
         }
     }
-    ge::send(sender, self(), cb_name_leave_room(), id, std::move(rsp));
+    ge::send(sender, self(), cb_name_leave_room, id, std::move(rsp));
 }
 void server::process_del_room_(const api::del_room_request& req, session_id id, ge::actor_address sender) {
     constexpr auto prefix = "server::process_del_room_";
@@ -85,7 +85,7 @@ void server::process_del_room_(const api::del_room_request& req, session_id id, 
     using code_enum = decltype(rsp)::code_enum;
     auto user_token = req.token().downcast();
     auto room_token = req.room_token().downcast();
-    auto it = check_user<api::del_room_response>(sender, req, id, user_token, cb_name_del_room());
+    auto it = check_user<api::del_room_response>(sender, req, id, user_token, cb_name_del_room);
     if (it == users_.end()) {
         return;
     }
@@ -108,7 +108,7 @@ void server::process_del_room_(const api::del_room_request& req, session_id id, 
             rooms_.erase(room_token);
         }
     }
-    ge::send(sender, self(), cb_name_del_room(), id, std::move(rsp));
+    ge::send(sender, self(), cb_name_del_room, id, std::move(rsp));
 }
 
 void server::process_list_room_(const api::list_rooms_request& req, session_id id, ge::actor_address sender) {
@@ -116,7 +116,7 @@ void server::process_list_room_(const api::list_rooms_request& req, session_id i
     ZoneScopedN(prefix);
     log_.trace(prefix);
     auto user_token = req.token().downcast();
-    auto it = check_user<api::list_rooms_response>(sender, req, id, user_token, cb_name_list_room());
+    auto it = check_user<api::list_rooms_response>(sender, req, id, user_token, cb_name_list_room);
     if (it == users_.end()) {
         return;
     }
@@ -133,5 +133,5 @@ void server::process_list_room_(const api::list_rooms_request& req, session_id i
         data.count = r_ptr->users().size();
         rooms_data.emplace_back(data);
     }
-    ge::send(sender, self(), cb_name_list_room(), id, std::move(rsp));
+    ge::send(sender, self(), cb_name_list_room, id, std::move(rsp));
 }

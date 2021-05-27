@@ -6,8 +6,9 @@
 #include <map>
 #include <memory>
 #include <restinio/all.hpp>
+#include <string>
 
-#include "api/json_obj.h"
+#include "api/json.hpp"
 #include "components/log.hpp"
 #include "components/tracy_include.hpp"
 #include "dispatcher/dispatcher.h"
@@ -28,8 +29,9 @@ public:
 
     auto handle_request(const req_t& req) -> rst::request_handling_status_t;
     void on_dispatcher_json_error(session_id id, json::error_code ec);
+    void on_dispatcher_json_error_str(session_id id, std::string& err);
     void on_dispatcher_error(session_id id, dispatcher::error_code ec);
-    void on_dispatcher_response(session_id id, std::string& j);
+    void on_dispatcher_response(session_id id, json_t& j);
 
 private:
     using router_t = rst::router::express_router_t<rst::router::std_regex_engine_t>;

@@ -9,10 +9,10 @@ namespace api {
         static const inline prop_val<std::string> type{"type", "new_room_request"};
         prop_val<std::string> token = {"token", ""};
         prop_val<std::string> pass_hash = {"pass_hash", ""};
-        prop_val<std::string> room_pass_hash = {"room_pass_hash", ""};
+        //prop_val<std::string> room_pass_hash = {"room_pass_hash", ""};
 
-        static auto from_json(const json& j) -> new_room_request;
-        auto to_json() const -> json;
+        static auto from_json(const json_t& j) -> new_room_request;
+        auto to_json() const -> json_t;
     };
 
     struct new_room_response {
@@ -28,21 +28,21 @@ namespace api {
         prop_val<std::string> message = {"message", ""};
         prop_val<std::string> room_token = {"room_token", ""};
 
-        static auto from_json(const json& j) -> new_room_response;
-        auto to_json() const -> json;
+        static auto from_json(const json_t& j) -> new_room_response;
+        auto to_json() const -> json_t;
     };
 
-    inline auto new_room_request::from_json(const json& j) -> new_room_request {
+    inline auto new_room_request::from_json(const json_t& j) -> new_room_request {
         ZoneScoped;
         new_room_request req;
         read_from_json(j, req.token);
         read_from_json(j, req.pass_hash);
-        read_from_json(j, req.room_pass_hash);
+        //read_from_json(j, req.room_pass_hash);
         return req;
     }
-    inline auto new_room_request::to_json() const -> json {
+    inline auto new_room_request::to_json() const -> json_t {
         ZoneScoped;
-        json j;
+        json_t j;
         write_to_json(j, this->type);
         write_to_json(j, this->token);
         write_to_json(j, this->pass_hash);
@@ -50,7 +50,7 @@ namespace api {
     }
 
     /*==============================================================*/
-    inline auto new_room_response::from_json(const json& j) -> new_room_response {
+    inline auto new_room_response::from_json(const json_t& j) -> new_room_response {
         ZoneScoped;
         new_room_response rsp;
         read_from_json(j, rsp.code);
@@ -58,9 +58,9 @@ namespace api {
         read_from_json(j, rsp.room_token);
         return rsp;
     }
-    inline auto new_room_response::to_json() const -> json {
+    inline auto new_room_response::to_json() const -> json_t {
         ZoneScoped;
-        json j;
+        json_t j;
         write_to_json(j, this->type);
         write_to_json(j, this->code);
         write_to_json(j, this->message);

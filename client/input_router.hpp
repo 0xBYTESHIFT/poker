@@ -21,6 +21,10 @@ struct input_router {
         return rsp;
     }
 
+    auto send(const std::string& remote, const json_t& j) -> cpr::Response {
+        return send(remote, json::serialize(j));
+    }
+
     void run(const std::string& remote) {
         std::string line;
         std::string token, pass_hash, email;
@@ -35,12 +39,12 @@ struct input_router {
                 api::login_request req;
                 req.email = words.at(1);
                 req.pass_hash = hash(words.at(2));
-                email = req.email;
-                pass_hash = req.pass_hash;
-                auto rsp = send(remote, api::to_json(req));
+                email = req.email()();
+                pass_hash = req.pass_hash()();
+                auto rsp = send(remote, req.to_json());
                 std::cout << rsp.error.message << " " << rsp.text << std::endl;
-                auto rsp_ = api::from_json<api::login_response>(rsp.text);
-                token = rsp_.token;
+                auto rsp_ = api::login_response::from_json(json::parse(rsp.text));
+                token = rsp_.token()();
                 continue;
             }
             if (cmd == "/r") {

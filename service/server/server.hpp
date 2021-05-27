@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "api/api.hpp"
-#include "api/json_obj.h"
+#include "api/json.hpp"
 #include "components/log.hpp"
 #include "components/tracy_include.hpp"
 #include "service/room/room.hpp"
@@ -22,20 +22,21 @@ public:
 
     server(actor_zeta::intrusive_ptr<manager> ptr);
 
-    void handle_request(ge::actor_address sender, session_id id, json& j);
+    void handle_request(ge::actor_address sender, session_id id, json_t& j);
     void on_db_login_response(session_id id, api::login_response& rsp);
     void on_db_register_response(session_id id, api::register_response& rsp);
     void on_db_unregister_response(session_id id, api::unregister_response& rsp);
 
-    static auto cb_name_login() { return "on_login_response"; }
-    static auto cb_name_unlogin() { return "on_unlogin_response"; }
-    static auto cb_name_register() { return "on_register_response"; }
-    static auto cb_name_unregister() { return "on_unregister_response"; }
-    static auto cb_name_new_room() { return "on_new_room_response"; }
-    static auto cb_name_enter_room() { return "on_enter_room_response"; }
-    static auto cb_name_leave_room() { return "on_leave_room_response"; }
-    static auto cb_name_del_room() { return "on_del_room_response"; }
-    static auto cb_name_list_room() { return "on_list_room_response"; }
+    const static inline auto cb_name_login = "on_login_response";
+    const static inline auto cb_name_unlogin = "on_unlogin_response";
+    const static inline auto cb_name_register = "on_register_response";
+    const static inline auto cb_name_unregister = "on_unregister_response";
+    const static inline auto cb_name_new_room = "on_new_room_response";
+    const static inline auto cb_name_enter_room = "on_enter_room_response";
+    const static inline auto cb_name_leave_room = "on_leave_room_response";
+    const static inline auto cb_name_del_room = "on_del_room_response";
+    const static inline auto cb_name_list_room = "on_list_room_response";
+    const static inline auto cb_name_error = "on_server_error";
 
 private:
     auto gen_token_() -> std::string;

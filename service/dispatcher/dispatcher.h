@@ -30,6 +30,7 @@ public:
     using req_t = std::shared_ptr<restinio::generic_request_t<restinio::no_extra_data_factory_t::data_t>>;
     using session_id = std::uint64_t;
     const static inline auto cb_name_json_error = "on_dispatcher_json_error";
+    const static inline auto cb_name_json_error_str = "on_dispatcher_json_error_str";
     const static inline auto cb_name_error = "on_dispatcher_error";
     const static inline auto cb_name_response = "on_dispatcher_response";
 
@@ -46,6 +47,7 @@ public:
     void on_leave_room_response(session_id, api::leave_room_response& rsp);
     void on_list_room_response(session_id, api::list_rooms_response& rsp);
     void on_del_room_response(session_id, api::del_room_response& rsp);
+    void on_server_error(session_id, std::string& err);
 
 private:
     logger log_;

@@ -12,7 +12,7 @@ namespace api {
         prop_val<str_t> pass_hash = {"pass_hash", ""};
         prop_val<str_t> room_token = {"room_token", ""};
 
-        static auto from_json(const json& j) -> leave_room_request;
+        static auto from_json(const json_t& j) -> leave_room_request;
         auto to_json() const -> str_t;
     };
 
@@ -29,11 +29,11 @@ namespace api {
         prop_val<code_enum> code = {"code", code_enum::ETC};
         prop_val<str_t> message = {"message", ""};
 
-        static auto from_json(const json& j) -> leave_room_response;
+        static auto from_json(const json_t& j) -> leave_room_response;
         auto to_json() const -> str_t;
     };
 
-    inline auto poker_start_request::from_json(const json& j) -> poker_start_request {
+    inline auto poker_start_request::from_json(const json_t& j) -> poker_start_request {
         ZoneScoped;
         poker_start_request r;
         r.token() = j.value_as<str_t>(r.token().name());
@@ -59,7 +59,7 @@ namespace api {
     }
 
     /*==============================================================*/
-    inline auto poker_start_response::from_json(const json& j) -> poker_start_request {
+    inline auto poker_start_response::from_json(const json_t& j) -> poker_start_request {
         ZoneScoped;
         poker_start_response r;
         auto temp = j.value_as<std::size_t>(r.code().name());

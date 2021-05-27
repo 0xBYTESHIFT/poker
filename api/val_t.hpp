@@ -1,13 +1,13 @@
 #pragma once
+#include "api/json.hpp"
 #include "components/property.hpp"
 #include "components/tracy_include.hpp"
 #include <string>
-#include "api/json_obj.h"
 
 namespace api {
 
     template<class T>
-    struct val_t {
+    struct val_t final {
         using value_t = T;
 
         val_t() = delete;
@@ -34,55 +34,57 @@ namespace api {
         auto name() const -> const std::string& { return name_; }
 
     protected:
-        const std::string name_;
+        std::string name_;
         T val_;
     };
 
     template<class T>
     using prop_val = property<val_t<T>>;
 
-    template<class Json, class T>
-    void read_from_json(const Json& j, prop_val<T>& val) requires std::is_convertible_v<T, std::string_view> {
-        val()() = j[val().name()].GetString();
+    template<class T>
+    void read_from_json(const json_t& j, prop_val<T>& val) requires std::is_convertible_v<T, std::string_view> {
+        val()() = boost::json::value_to<std::string>(j.at(val().name()));
     }
 
-    template<class Json, class T>
-    void read_from_json(const Json& j, prop_val<T>& val) requires std::floating_point<T> {
-        val()() = j[val().name()].GetDouble();
+    template<class T>
+    void read_from_json(const json_t& j, prop_val<T>& val) requires std::floating_point<T> {
+        val()() = boost::json::value_to<double>(j.at(val().name()));
     }
 
-    template<class Json, class T>
-    void read_from_json(const Json& j, prop_val<T>& val) requires std::integral<T> {
-        val()() = j[val().name()].GetInt();
+    template<class T>
+    void read_from_json(const json_t& j, prop_val<T>& val) requires std::integral<T> {
+        val()() = boost::json::value_to<int>(j.at(val().name()));
     }
 
-    template<class Json, class T>
-    void read_from_json(const Json& j, prop_val<T>& val) {
-        val()() = static_cast<T>(j[val().name()].GetInt());
+    template<class T>
+    void read_from_json(const json_t& j, prop_val<T>& val) {
+        val()() = static_cast<T>(boost::json::value_to<int>(j.at(val().name())));
     }
 
-    template<class Json, class T>
-    void write_to_json(Json& j, const prop_val<T>& val) requires std::floating_point<T> || std::integral<T> || std::is_convertible_v<T, std::string_view> {
-        ZoneScoped;
+    template<class T>
+        void write_to_json(json_t& j, const prop_val<T>& val) requires std::floating_point<T> || std::integral<T> || std::is_convertible_v<T, std::string_view> {
         j[val().name()] = val()();
     }
 
-    template<class Json, class T>
-    void write_to_json(Json& j, const prop_val<T>& val) {
-        ZoneScoped;
+    template<class T>
+    void write_to_json(json_t& j, const prop_val<T>& val) {
         j[val().name()] = static_cast<int>(val()());
     }
 
-    template<class Json, class T>
-    void write_to_json(Json& j, const std::string& name, const std::vector<T>& vec) {
-        ZoneScoped;
-        rapidjson::StringBuffer sb;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> wr(sb);
-        wr.String(name);
-        wr.StartArray();
-        for(auto &v:vec){
-        }
-        wr.EndArray();
-        j["name"] = json(sb.GetString()).inner_doc();
+    template<class T>
+    void extract(const boost::json::object& obj, T& t, std::string_view key) {
+        //t = value_to<T>(obj.at(key));
     }
+
+    /*
+    template<class T>
+    auto tag_invoke(value_to_tag<prop_val<T>>, const boost::json::value& jv) -> prop_val<T>{
+        customer c;
+        object const& obj = jv.as_object();
+        extract(obj, c.id, "id");
+        extract(obj, c.name, "name");
+        extract(obj, c.current, "current");
+        return c;
+    }
+    */
 }; // namespace api

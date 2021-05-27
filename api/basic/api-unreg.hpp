@@ -1,5 +1,5 @@
 #pragma once
-#include "api/json_obj.h"
+#include "api/json.hpp"
 #include "api/val_t.hpp"
 #include "components/tracy_include.hpp"
 
@@ -11,8 +11,8 @@ namespace api {
         prop_val<std::string> pass_hash{"pass_hash", ""};
         prop_val<std::string> token{"token", ""};
 
-        static auto from_json(const json& j) -> unregister_request;
-        auto to_json() const -> json;
+        static auto from_json(const json_t& j) -> unregister_request;
+        auto to_json() const -> json_t;
     };
 
     struct unregister_response {
@@ -27,11 +27,11 @@ namespace api {
         prop_val<std::string> message{"message", ""};
         prop_val<code_enum> code{"code", code_enum::ETC};
 
-        static auto from_json(const json& j) -> unregister_response;
-        auto to_json() const -> json;
+        static auto from_json(const json_t& j) -> unregister_response;
+        auto to_json() const -> json_t;
     };
 
-    inline auto unregister_request::from_json(const json& j) -> unregister_request {
+    inline auto unregister_request::from_json(const json_t& j) -> unregister_request {
         ZoneScoped;
         unregister_request req;
         read_from_json(j, req.email);
@@ -39,9 +39,9 @@ namespace api {
         read_from_json(j, req.pass_hash);
         return req;
     }
-    inline auto unregister_request::to_json() const -> json {
+    inline auto unregister_request::to_json() const -> json_t{
         ZoneScoped;
-        json j;
+        json_t j;
         write_to_json(j, type);
         write_to_json(j, email);
         write_to_json(j, token);
@@ -49,16 +49,16 @@ namespace api {
         return j;
     }
 
-    inline auto unregister_response::from_json(const json& j) -> unregister_response {
+    inline auto unregister_response::from_json(const json_t& j) -> unregister_response {
         ZoneScoped;
         unregister_response rsp;
         read_from_json(j, rsp.code);
         read_from_json(j, rsp.message);
         return rsp;
     }
-    inline auto unregister_response::to_json() const -> json {
+    inline auto unregister_response::to_json() const -> json_t{
         ZoneScoped;
-        json j;
+        json_t j;
         write_to_json(j, type);
         write_to_json(j, code);
         write_to_json(j, message);

@@ -1,5 +1,5 @@
-#include "rest_worker.h"
 #include "manager/manager.hpp"
+#include "rest_worker.h"
 #include <mutex>
 
 static std::mutex mt;
@@ -39,6 +39,7 @@ rest_worker::rest_worker(actor_zeta::intrusive_ptr<manager> ptr, boost::asio::io
 
     add_handler("run", &rest_worker::run_);
     add_handler(dispatcher::cb_name_json_error, &rest_worker::on_dispatcher_json_error);
+    add_handler(dispatcher::cb_name_json_error_str, &rest_worker::on_dispatcher_json_error_str);
     add_handler(dispatcher::cb_name_error, &rest_worker::on_dispatcher_error);
     add_handler(dispatcher::cb_name_response, &rest_worker::on_dispatcher_response);
 }
@@ -90,11 +91,30 @@ void rest_worker::on_dispatcher_json_error(session_id id, json::error_code ec) {
         return;
     }
     auto& req = it->second;
-    auto mes = ec.mes();
+    auto mes = ec.message();
     log_.error("{} id:{} mes:{}", prefix, id, mes);
     rest_worker::init_resp_(req->create_response())
-        .append_header(restinio::http_field::content_type, "text/json; charset=utf-8")
-        .set_body(fmt::format("{{\"message\" : \"{}\"}}", mes))
+        .append_header(restinio::http_field::content_type, "text/json_t; charset=utf-8")
+        .set_body(fmt::format("{{\"code\":1, \"message\" : \"{}\"}}", mes))
+        .done();
+    requests.erase(id);
+}
+
+void rest_worker::on_dispatcher_json_error_str(session_id id, std::string& err) {
+    constexpr auto prefix = "rest_worker::on_dispatcher_json_error_str";
+    ZoneScopedN(prefix);
+    log_.trace("{}", prefix);
+    auto it = requests.find(id);
+    if (it == requests.end()) {
+        log_.error("{} unknown id:{}", prefix, id);
+        return;
+    }
+    auto& req = it->second;
+    auto mes = std::move(err);
+    log_.error("{} id:{} mes:{}", prefix, id, mes);
+    rest_worker::init_resp_(req->create_response())
+        .append_header(restinio::http_field::content_type, "text/json_t; charset=utf-8")
+        .set_body(fmt::format("{{\"code\":1, \"message\" : \"{}\"}}", mes))
         .done();
     requests.erase(id);
 }
@@ -112,16 +132,17 @@ void rest_worker::on_dispatcher_error(session_id id, dispatcher::error_code ec) 
     auto mes = ec.mes();
     log_.error("{} id:{} mes:{}", prefix, id, mes);
     rest_worker::init_resp_(req->create_response())
-        .append_header(restinio::http_field::content_type, "text/json; charset=utf-8")
+        .append_header(restinio::http_field::content_type, "text/json_t; charset=utf-8")
         .set_body(fmt::format("{{\"message\" : \"{}\"}}", mes))
         .done();
     requests.erase(id);
 }
-void rest_worker::on_dispatcher_response(session_id id, std::string& j_) {
+
+void rest_worker::on_dispatcher_response(session_id id, json_t& j_) {
     constexpr auto prefix = "rest_worker::on_dispatcher_response";
     ZoneScopedN(prefix);
     log_.trace("{}", prefix);
-    auto j_str = std::move(j_);
+    auto j_str = json::serialize(std::move(j_));
     auto it = requests.find(id);
     if (it == requests.end()) {
         log_.error("{} unknown id:{}", prefix, id);
@@ -130,7 +151,7 @@ void rest_worker::on_dispatcher_response(session_id id, std::string& j_) {
     auto& req = it->second;
     log_.debug("{} id:{} mes:{}", prefix, id, j_str);
     rest_worker::init_resp_(req->create_response())
-        .append_header(restinio::http_field::content_type, "text/json; charset=utf-8")
+        .append_header(restinio::http_field::content_type, "text/json_t; charset=utf-8")
         .set_body(j_str)
         .done();
     requests.erase(id);
