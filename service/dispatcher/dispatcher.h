@@ -6,6 +6,7 @@
 #include "api/api.hpp"
 #include "components/log.hpp"
 #include "components/tracy_include.hpp"
+#include "dispatcher-routes.hpp"
 
 class manager;
 namespace ge = goblin_engineer;
@@ -29,10 +30,6 @@ public:
 
     using req_t = std::shared_ptr<restinio::generic_request_t<restinio::no_extra_data_factory_t::data_t>>;
     using session_id = std::uint64_t;
-    const static inline auto cb_name_json_error = "on_dispatcher_json_error";
-    const static inline auto cb_name_json_error_str = "on_dispatcher_json_error_str";
-    const static inline auto cb_name_error = "on_dispatcher_error";
-    const static inline auto cb_name_response = "on_dispatcher_response";
 
     explicit dispatcher(actor_zeta::intrusive_ptr<manager> ptr);
 

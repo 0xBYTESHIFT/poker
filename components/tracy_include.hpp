@@ -4,6 +4,11 @@
 
 #define ZoneScoped
 #define ZoneScopedN(txt)
+#define ZoneScopedTraceL(txt)                      \
+    [[maybe_unused]] constexpr auto prefix = #txt; \
+    log_.trace("{}", prefix);
+#define ZoneScopedTrace(txt) \
+    [[maybe_unused]] constexpr auto prefix = #txt;
 #define TracySecureAlloc(ptr, count)
 #define TracySecureFree(ptr)
 #define TracyFrame(data, name)
@@ -41,5 +46,14 @@ inline void operator delete(void* ptr) {
 
 #define TracyFrameStart(name) FrameMarkStart(name)
 #define TracyFrameEnd(name) FrameMarkEnd(name)
+
+#define ZoneScopedTraceL(txt)                      \
+    [[maybe_unused]] constexpr auto prefix = #txt; \
+    ZoneScopedN(prefix);                           \
+    log_.trace("{}", prefix);
+
+#define ZoneScopedTrace(txt)                       \
+    [[maybe_unused]] constexpr auto prefix = #txt; \
+    ZoneScopedN(prefix);
 
 #endif

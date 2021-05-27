@@ -11,7 +11,9 @@
 #include "api/json.hpp"
 #include "components/log.hpp"
 #include "components/tracy_include.hpp"
+#include "dispatcher/dispatcher-routes.hpp"
 #include "dispatcher/dispatcher.h"
+#include "rest_worker-routes.hpp"
 
 class manager;
 namespace ge = goblin_engineer;

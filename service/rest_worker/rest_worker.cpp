@@ -29,25 +29,21 @@ auto rest_worker::create_server_handler_() -> std::unique_ptr<router_t> {
 }
 
 rest_worker::rest_worker(actor_zeta::intrusive_ptr<manager> ptr, boost::asio::io_context& ctx, size_t port)
-    : ge::abstract_service(ptr, "rest_worker")
+    : ge::abstract_service(ptr, rest_worker_routes::name)
     , ctx_(ctx)
     , port_(port) {
-    constexpr auto prefix = "rest_worker::rest_worker";
-    ZoneScopedN(prefix);
     this->log_ = get_logger();
-    log_.trace("{}", prefix);
+    ZoneScopedTraceL("rest_worker::rest_worker");
 
-    add_handler("run", &rest_worker::run_);
-    add_handler(dispatcher::cb_name_json_error, &rest_worker::on_dispatcher_json_error);
-    add_handler(dispatcher::cb_name_json_error_str, &rest_worker::on_dispatcher_json_error_str);
-    add_handler(dispatcher::cb_name_error, &rest_worker::on_dispatcher_error);
-    add_handler(dispatcher::cb_name_response, &rest_worker::on_dispatcher_response);
+    add_handler(rest_worker_routes::name_run, &rest_worker::run_);
+    add_handler(dispatcher_routes::cb_name_json_error, &rest_worker::on_dispatcher_json_error);
+    add_handler(dispatcher_routes::cb_name_json_error_str, &rest_worker::on_dispatcher_json_error_str);
+    add_handler(dispatcher_routes::cb_name_error, &rest_worker::on_dispatcher_error);
+    add_handler(dispatcher_routes::cb_name_response, &rest_worker::on_dispatcher_response);
 }
 
 void rest_worker::run_() {
-    constexpr auto prefix = "rest_worker::run_";
-    ZoneScopedN(prefix);
-    log_.trace("{}", prefix);
+    ZoneScopedTraceL("rest_worker::run_");
     using namespace std::chrono;
 
     this->server_ = restinio::run_async(
@@ -59,15 +55,13 @@ void rest_worker::run_() {
             .read_next_http_message_timelimit(5ms)
             .write_http_response_timelimit(5ms),
         4);
-    log_.debug("{} run ended", prefix);
+    log_.trace("{} run ended", prefix);
     //.handle_request_timeout(1s));
 }
 
 auto rest_worker::handle_request(const req_t& req) -> restinio::request_handling_status_t {
-    constexpr auto prefix = "rest_worker::handle_request";
-    ZoneScopedN(prefix);
+    ZoneScopedTraceL("rest_worker::handle_request");
     std::lock_guard<std::mutex> lock(mt);
-    log_.trace("{}", prefix);
     if (!req) {
         log_.error("{} no request!", prefix);
         return restinio::request_rejected();
@@ -82,9 +76,7 @@ auto rest_worker::handle_request(const req_t& req) -> restinio::request_handling
 }
 
 void rest_worker::on_dispatcher_json_error(session_id id, json::error_code ec) {
-    constexpr auto prefix = "rest_worker::on_dispatcher_json_error";
-    ZoneScopedN(prefix);
-    log_.trace("{}", prefix);
+    ZoneScopedTraceL("rest_worker::on_dispatcher_json_error");
     auto it = requests.find(id);
     if (it == requests.end()) {
         log_.error("{} unknown id:{}", prefix, id);
@@ -101,9 +93,7 @@ void rest_worker::on_dispatcher_json_error(session_id id, json::error_code ec) {
 }
 
 void rest_worker::on_dispatcher_json_error_str(session_id id, std::string& err) {
-    constexpr auto prefix = "rest_worker::on_dispatcher_json_error_str";
-    ZoneScopedN(prefix);
-    log_.trace("{}", prefix);
+    ZoneScopedTraceL("rest_worker::on_dispatcher_json_error_str");
     auto it = requests.find(id);
     if (it == requests.end()) {
         log_.error("{} unknown id:{}", prefix, id);
@@ -120,9 +110,7 @@ void rest_worker::on_dispatcher_json_error_str(session_id id, std::string& err) 
 }
 
 void rest_worker::on_dispatcher_error(session_id id, dispatcher::error_code ec) {
-    constexpr auto prefix = "rest_worker::on_dispatcher_error";
-    ZoneScopedN(prefix);
-    log_.trace("{}", prefix);
+    ZoneScopedTraceL("rest_worker::on_dispatcher_error");
     auto it = requests.find(id);
     if (it == requests.end()) {
         log_.error("{} unknown id:{}", prefix, id);
@@ -139,9 +127,7 @@ void rest_worker::on_dispatcher_error(session_id id, dispatcher::error_code ec) 
 }
 
 void rest_worker::on_dispatcher_response(session_id id, json_t& j_) {
-    constexpr auto prefix = "rest_worker::on_dispatcher_response";
-    ZoneScopedN(prefix);
-    log_.trace("{}", prefix);
+    ZoneScopedTraceL("rest_worker::on_dispatcher_response");
     auto j_str = json::serialize(std::move(j_));
     auto it = requests.find(id);
     if (it == requests.end()) {
