@@ -1,5 +1,7 @@
 # Pre-build
 
+[![build](https://github.com/0xBYTESHIFT/poker/actions/workflows/docker-build.yml/badge.svg)](https://github.com/0xBYTESHIFT/poker/actions/workflows/docker-build.yml)
+
 ```
 pip3 install conan
 conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
@@ -21,23 +23,23 @@ cmake --build . --config Release
 
 # TODO
 
-[ ] Account
-    [x] Register
-    [x] Login
-    [x] Unlogin
-    [x] Unregister
-    [ ] Donate
-[ ] Rooms
-    [x] Make room
-        [ ] Make passworded rooms
-        [ ] Make hidden rooms
-    [x] List rooms
-    [x] Enter room
-    [x] Leave room
-[ ] Poker
-    [ ] Start game
-    [ ] Leave game
-    [ ] Request cards
-    [ ] Make a bet
-    [ ] Split bank
-    [ ] Matchmaking
+- [ ] Account
+    - [x] Register
+    - [x] Login
+    - [x] Unlogin
+    - [x] Unregister
+    - [ ] Donate
+- [ ] Rooms
+    - [x] Make room
+        - [ ] Make passworded rooms
+        - [ ] Make hidden rooms
+    - [x] List rooms
+    - [x] Enter room
+    - [x] Leave room
+- [ ] Poker
+    - [ ] Start game
+    - [ ] Leave game
+    - [ ] Request cards
+    - [ ] Make a bet
+    - [ ] Split bank
+    - [ ] Matchmaking
