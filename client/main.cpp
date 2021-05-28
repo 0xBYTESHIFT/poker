@@ -9,8 +9,6 @@
 
 #include "components/log.hpp"
 #include "components/tracy_include.hpp"
-//#include "coordinator/coord.hpp"
-//#include "manager/manager.hpp"
 #include "input_router.hpp"
 #include <goblin-engineer/core.hpp>
 

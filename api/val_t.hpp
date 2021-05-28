@@ -3,6 +3,7 @@
 #include "components/property.hpp"
 #include "components/tracy_include.hpp"
 #include <string>
+#include <type_traits>
 
 namespace api {
 
@@ -47,12 +48,12 @@ namespace api {
     }
 
     template<class T>
-    void read_from_json(const json_t& j, prop_val<T>& val) requires std::floating_point<T> {
+    void read_from_json(const json_t& j, prop_val<T>& val) requires std::is_floating_point_v<T> {
         val()() = boost::json::value_to<double>(j.at(val().name()));
     }
 
     template<class T>
-    void read_from_json(const json_t& j, prop_val<T>& val) requires std::integral<T> {
+    void read_from_json(const json_t& j, prop_val<T>& val) requires std::is_integral_v<T> {
         val()() = boost::json::value_to<int>(j.at(val().name()));
     }
 
@@ -62,7 +63,7 @@ namespace api {
     }
 
     template<class T>
-        void write_to_json(json_t& j, const prop_val<T>& val) requires std::floating_point<T> || std::integral<T> || std::is_convertible_v<T, std::string_view> {
+    void write_to_json(json_t& j, const prop_val<T>& val) requires(std::is_floating_point_v<T> || std::is_integral_v<T> || std::is_convertible_v<T, std::string_view>) {
         j[val().name()] = val()();
     }
 
