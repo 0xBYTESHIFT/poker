@@ -10,8 +10,8 @@ namespace api {
         prop_val<std::string> token = {"token", ""};
         prop_val<std::string> pass_hash = {"pass_hash", ""};
 
-        static auto from_json(const json_t& j) -> list_rooms_request;
-        auto to_json() const -> json_t;
+        list_rooms_request() = default;
+        list_rooms_request(const json_t& j);
     };
 
     struct list_rooms_response {
@@ -32,35 +32,31 @@ namespace api {
         using rooms_t = std::vector<room_data_t>;
         prop_val<rooms_t> rooms_data = {"rooms_data", rooms_t{}};
 
-        static auto from_json(const json_t& j) -> list_rooms_response;
-        auto to_json() const -> json_t;
+        list_rooms_response() = default;
+        list_rooms_response(const json_t& j);
     };
 
-    inline auto list_rooms_request::from_json(const json_t& j) -> list_rooms_request {
+    inline list_rooms_request::list_rooms_request(const json_t& j) {
         ZoneScoped;
-        list_rooms_request req;
-        read_from_json(j, req.token);
-        read_from_json(j, req.pass_hash);
-        return req;
+        read_from_json(j, token);
+        read_from_json(j, pass_hash);
     }
-    inline auto list_rooms_request::to_json() const -> json_t {
+    inline auto to_json(const list_rooms_request& req) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, this->type);
-        write_to_json(j, this->token);
-        write_to_json(j, this->pass_hash);
+        write_to_json(j, req.type);
+        write_to_json(j, req.token);
+        write_to_json(j, req.pass_hash);
         return j;
     }
 
-    /*==============================================================*/
-    inline auto list_rooms_response::from_json(const json_t& j) -> list_rooms_response {
+    inline list_rooms_response::list_rooms_response(const json_t& j) {
         ZoneScoped;
-        list_rooms_response rsp;
-        read_from_json(j, rsp.code);
-        read_from_json(j, rsp.message);
+        read_from_json(j, code);
+        read_from_json(j, message);
 
-        auto& arr = j.at(rsp.rooms_data().name()).as_array();
-        auto& rooms_data = rsp.rooms_data().downcast();
+        auto& arr = j.at(rooms_data().name()).as_array();
+        auto& rooms_data = this->rooms_data().downcast();
         rooms_data.reserve(arr.size());
         for (auto& j_ : arr) {
             room_data_t rd;
@@ -69,24 +65,24 @@ namespace api {
             read_from_json(j_.as_object(), rd.count);
             rooms_data.emplace_back(rd);
         }
-        return rsp;
     }
-    inline auto list_rooms_response::to_json() const -> json_t {
+    inline auto to_json(const list_rooms_response& rsp) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, this->type);
-        write_to_json(j, this->code);
-        write_to_json(j, this->message);
+        write_to_json(j, rsp.type);
+        write_to_json(j, rsp.code);
+        write_to_json(j, rsp.message);
+        auto& rooms_data = rsp.rooms_data();
         std::vector<boost::json::object> j_list;
-        j_list.reserve(rooms_data()().size());
-        for (auto& r_d : rooms_data()()) {
+        j_list.reserve(rooms_data().size());
+        for (auto& r_d : rooms_data()) {
             json_t j_;
             write_to_json(j_, r_d.name);
             write_to_json(j_, r_d.token);
             write_to_json(j_, r_d.count);
             j_list.emplace_back(std::move(j));
         }
-        j[rooms_data().name()] = boost::json::value_from(j_list);
+        j[rooms_data.name()] = boost::json::value_from(j_list);
         return j;
     }
 

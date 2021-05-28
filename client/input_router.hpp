@@ -41,9 +41,9 @@ struct input_router {
                 req.pass_hash = hash(words.at(2));
                 email = req.email()();
                 pass_hash = req.pass_hash()();
-                auto rsp = send(remote, req.to_json());
+                auto rsp = send(remote, api::to_json(req));
                 std::cout << rsp.error.message << " " << rsp.text << std::endl;
-                auto rsp_ = api::login_response::from_json(json::parse(rsp.text));
+                auto rsp_ = api::login_response(json::parse(rsp.text));
                 token = rsp_.token()();
                 continue;
             }
@@ -52,7 +52,7 @@ struct input_router {
                 req.nickname = words.at(1);
                 req.pass_hash = hash(words.at(2));
                 req.email = words.at(3);
-                auto rsp = send(remote, req.to_json());
+                auto rsp = send(remote, api::to_json(req));
                 std::cout << rsp.error.message << " " << rsp.text << std::endl;
                 continue;
             }
@@ -60,7 +60,7 @@ struct input_router {
                 api::new_room_request req;
                 req.token = token;
                 req.pass_hash = pass_hash;
-                auto rsp = send(remote, req.to_json());
+                auto rsp = send(remote, api::to_json(req));
                 std::cout << rsp.error.message << " " << rsp.text << std::endl;
                 continue;
             }
@@ -68,7 +68,7 @@ struct input_router {
                 api::list_rooms_request req;
                 req.token = token;
                 req.pass_hash = pass_hash;
-                auto rsp = send(remote, req.to_json());
+                auto rsp = send(remote, api::to_json(req));
                 std::cout << rsp.error.message << " " << rsp.text << std::endl;
                 continue;
             }
@@ -77,7 +77,7 @@ struct input_router {
                 req.email = email;
                 req.pass_hash = pass_hash;
                 req.token = token;
-                auto rsp = send(remote, req.to_json());
+                auto rsp = send(remote, api::to_json(req));
                 std::cout << rsp.error.message << " " << rsp.text << std::endl;
                 continue;
             }

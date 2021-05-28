@@ -2,6 +2,7 @@
 #include "api/json.hpp"
 #include "api/val_t.hpp"
 #include "components/tracy_include.hpp"
+#include <string>
 
 namespace api {
 
@@ -10,8 +11,8 @@ namespace api {
         prop_val<std::string> email{"email", ""};
         prop_val<std::string> pass_hash{"pass", ""};
 
-        static auto from_json(const json_t& j) -> login_request;
-        auto to_json() const -> json_t;
+        login_request() = default;
+        login_request(const json_t& j);
     };
 
     struct login_response {
@@ -26,40 +27,39 @@ namespace api {
         prop_val<std::string> token{"token", ""};
         prop_val<code_enum> code{"code", code_enum::ETC};
 
-        static auto from_json(const json_t& j) -> login_response;
-        auto to_json() const -> json_t;
+        login_response() = default;
+        login_response(const json_t& j);
     };
 
-    inline auto login_request::from_json(const json_t& j) -> login_request {
+    inline login_request::login_request(const json_t& j) {
         ZoneScoped;
-        login_request req;
-        read_from_json(j, req.email);
-        read_from_json(j, req.pass_hash);
-        return req;
+        read_from_json(j, email);
+        read_from_json(j, pass_hash);
     }
-    inline auto login_request::to_json() const -> json_t {
+
+    inline auto to_json(const login_request& req) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, type);
-        write_to_json(j, email);
-        write_to_json(j, pass_hash);
+        write_to_json(j, req.type);
+        write_to_json(j, req.email);
+        write_to_json(j, req.pass_hash);
         return j;
     }
-    inline auto login_response::from_json(const json_t& j) -> login_response {
+
+    inline login_response::login_response(const json_t& j) {
         ZoneScoped;
-        login_response rsp;
-        read_from_json(j, rsp.message);
-        read_from_json(j, rsp.token);
-        read_from_json(j, rsp.code);
-        return rsp;
+        read_from_json(j, message);
+        read_from_json(j, token);
+        read_from_json(j, code);
     }
-    inline auto login_response::to_json() const -> json_t {
+
+    inline auto to_json(const login_response& rsp) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, type);
-        write_to_json(j, message);
-        write_to_json(j, token);
-        write_to_json(j, code);
+        write_to_json(j, rsp.type);
+        write_to_json(j, rsp.message);
+        write_to_json(j, rsp.token);
+        write_to_json(j, rsp.code);
         return j;
     }
 }; // namespace api

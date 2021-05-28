@@ -10,8 +10,8 @@ namespace api {
         prop_val<std::string> email{"email", ""};
         prop_val<std::string> pass_hash{"pass", ""};
 
-        static auto from_json(const json_t& j) -> register_request;
-        auto to_json() const -> json_t;
+        register_request() = default;
+        register_request(const json_t& j);
     };
 
     struct register_response {
@@ -24,41 +24,37 @@ namespace api {
         prop_val<std::string> message{"message", ""};
         prop_val<code_enum> code{"code", code_enum::ETC};
 
-        static auto from_json(const json_t& j) -> register_response;
-        auto to_json() const -> json_t;
+        register_response() = default;
+        register_response(const json_t& j);
     };
 
-    inline auto register_request::from_json(const json_t& j) -> register_request {
+    inline register_request::register_request(const json_t& j) {
         ZoneScoped;
-        register_request req;
-        read_from_json(j, req.nickname);
-        read_from_json(j, req.email);
-        read_from_json(j, req.pass_hash);
-        return req;
+        read_from_json(j, nickname);
+        read_from_json(j, email);
+        read_from_json(j, pass_hash);
     }
-    inline auto register_request::to_json() const -> json_t {
+    inline auto to_json(const register_request& req) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, type);
-        write_to_json(j, nickname);
-        write_to_json(j, email);
-        write_to_json(j, pass_hash);
+        write_to_json(j, req.type);
+        write_to_json(j, req.nickname);
+        write_to_json(j, req.email);
+        write_to_json(j, req.pass_hash);
         return j;
     }
 
-    inline auto register_response::from_json(const json_t& j) -> register_response {
+    inline register_response::register_response(const json_t& j) {
         ZoneScoped;
-        register_response rsp;
-        read_from_json(j, rsp.code);
-        read_from_json(j, rsp.message);
-        return rsp;
+        read_from_json(j, code);
+        read_from_json(j, message);
     }
-    inline auto register_response::to_json() const -> json_t {
+    inline auto to_json(const register_response& rsp) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, type);
-        write_to_json(j, code);
-        write_to_json(j, message);
+        write_to_json(j, rsp.type);
+        write_to_json(j, rsp.code);
+        write_to_json(j, rsp.message);
         return j;
     }
 }; // namespace api

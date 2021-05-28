@@ -11,8 +11,8 @@ namespace api {
         prop_val<std::string> token{"token", ""};
         prop_val<std::string> pass_hash{"pass", ""};
 
-        static auto from_json(const json_t& j) -> unlogin_request;
-        auto to_json() const -> json_t;
+        unlogin_request() = default;
+        unlogin_request(const json_t& j);
     };
 
     struct unlogin_response {
@@ -27,41 +27,37 @@ namespace api {
         prop_val<code_enum> code{"code", code_enum::ETC};
         prop_val<std::string> message{"message", ""};
 
-        static auto from_json(const json_t& j) -> unlogin_response;
-        auto to_json() const -> json_t;
+        unlogin_response() = default;
+        unlogin_response(const json_t& j);
     };
 
-    inline auto unlogin_request::from_json(const json_t& j) -> unlogin_request {
+    inline unlogin_request::unlogin_request(const json_t& j) {
         ZoneScoped;
-        unlogin_request req;
-        read_from_json(j, req.email);
-        read_from_json(j, req.token);
-        read_from_json(j, req.pass_hash);
-        return req;
+        read_from_json(j, email);
+        read_from_json(j, token);
+        read_from_json(j, pass_hash);
     }
-    inline auto unlogin_request::to_json() const -> json_t{
+    inline auto to_json(const unlogin_request& req) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, type);
-        write_to_json(j, email);
-        write_to_json(j, token);
-        write_to_json(j, pass_hash);
+        write_to_json(j, req.type);
+        write_to_json(j, req.email);
+        write_to_json(j, req.token);
+        write_to_json(j, req.pass_hash);
         return j;
     }
 
-    inline auto unlogin_response::from_json(const json_t& j) -> unlogin_response {
+    inline unlogin_response::unlogin_response(const json_t& j) {
         ZoneScoped;
-        unlogin_response rsp;
-        read_from_json(j, rsp.code);
-        read_from_json(j, rsp.message);
-        return rsp;
+        read_from_json(j, code);
+        read_from_json(j, message);
     }
-    inline auto unlogin_response::to_json() const -> json_t{
+    inline auto to_json(const unlogin_response& rsp) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, type);
-        write_to_json(j, code);
-        write_to_json(j, message);
+        write_to_json(j, rsp.type);
+        write_to_json(j, rsp.code);
+        write_to_json(j, rsp.message);
         return j;
     }
 }; // namespace api

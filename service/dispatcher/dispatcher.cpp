@@ -56,55 +56,55 @@ void dispatcher::handle_request(ge::actor_address sender, session_id id, req_t& 
 void dispatcher::on_login_response(session_id id, api::login_response& rsp_) {
     ZoneScopedTraceL("dispatcher::on_login_response");
     auto rsp = std::move(rsp_);
-    auto j = rsp.to_json();
+    auto j = api::to_json(rsp);
     ge::send(addresses("rest_worker"), self(), dispatcher_routes::cb_name_response, id, std::move(j));
 }
 void dispatcher::on_unlogin_response(session_id id, api::unlogin_response& rsp_) {
     ZoneScopedTraceL("dispatcher::on_unlogin_response");
     auto rsp = std::move(rsp_);
-    auto j = rsp.to_json();
+    auto j = api::to_json(rsp);
     ge::send(addresses("rest_worker"), self(), dispatcher_routes::cb_name_response, id, std::move(j));
 }
 void dispatcher::on_register_response(session_id id, api::register_response& rsp_) {
     ZoneScopedTraceL("dispatcher::on_register_response");
     auto rsp = std::move(rsp_);
-    auto j = rsp.to_json();
+    auto j = api::to_json(rsp);
     ge::send(addresses("rest_worker"), self(), dispatcher_routes::cb_name_response, id, std::move(j));
 }
 void dispatcher::on_unregister_response(session_id id, api::unregister_response& rsp_) {
     ZoneScopedTraceL("dispatcher::on_unregister_response");
     auto rsp = std::move(rsp_);
-    auto j = rsp.to_json();
+    auto j = api::to_json(rsp);
     ge::send(addresses("rest_worker"), self(), dispatcher_routes::cb_name_response, id, std::move(j));
 }
 void dispatcher::on_new_room_response(session_id id, api::new_room_response& rsp_) {
     ZoneScopedTraceL("dispatcher::on_new_room_response");
     auto rsp = std::move(rsp_);
-    auto j = rsp.to_json();
+    auto j = api::to_json(rsp);
     ge::send(addresses("rest_worker"), self(), dispatcher_routes::cb_name_response, id, std::move(j));
 }
 void dispatcher::on_enter_room_response(session_id id, api::enter_room_response& rsp_) {
     ZoneScopedTraceL("dispatcher::on_enter_room_response");
     auto rsp = std::move(rsp_);
-    auto j = rsp.to_json();
+    auto j = api::to_json(rsp);
     ge::send(addresses("rest_worker"), self(), dispatcher_routes::cb_name_response, id, std::move(j));
 }
 void dispatcher::on_leave_room_response(session_id id, api::leave_room_response& rsp_) {
     ZoneScopedTraceL("dispatcher::on_leave_room_response");
     auto rsp = std::move(rsp_);
-    auto j = rsp.to_json();
+    auto j = api::to_json(rsp);
     ge::send(addresses("rest_worker"), self(), dispatcher_routes::cb_name_response, id, std::move(j));
 }
 void dispatcher::on_del_room_response(session_id id, api::del_room_response& rsp_) {
     ZoneScopedTraceL("dispatcher::on_del_room_response");
     auto rsp = std::move(rsp_);
-    auto j = rsp.to_json();
+    auto j = api::to_json(rsp);
     ge::send(addresses("rest_worker"), self(), dispatcher_routes::cb_name_response, id, std::move(j));
 }
 void dispatcher::on_list_room_response(session_id id, api::list_rooms_response& rsp_) {
     ZoneScopedTraceL("dispatcher::on_list_room_response");
     auto rsp = std::move(rsp_);
-    auto j = rsp.to_json();
+    auto j = api::to_json(rsp);
     ge::send(addresses("rest_worker"), self(), dispatcher_routes::cb_name_response, id, std::move(j));
 }
 

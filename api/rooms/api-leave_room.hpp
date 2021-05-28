@@ -11,8 +11,8 @@ namespace api {
         prop_val<std::string> pass_hash = {"pass_hash", ""};
         prop_val<std::string> room_token = {"room_token", ""};
 
-        static auto from_json(const json_t& j) -> leave_room_request;
-        auto to_json() const -> json_t;
+        leave_room_request() = default;
+        leave_room_request(const json_t& j);
     };
 
     struct leave_room_response {
@@ -28,41 +28,37 @@ namespace api {
         prop_val<code_enum> code = {"code", code_enum::ETC};
         prop_val<std::string> message = {"message", ""};
 
-        static auto from_json(const json_t& j) -> leave_room_response;
-        auto to_json() const -> json_t;
+        leave_room_response() = default;
+        leave_room_response(const json_t& j);
     };
 
-    inline auto leave_room_request::from_json(const json_t& j) -> leave_room_request {
+    inline leave_room_request::leave_room_request(const json_t& j) {
         ZoneScoped;
-        leave_room_request req;
-        read_from_json(j, req.token);
-        read_from_json(j, req.room_token);
-        read_from_json(j, req.pass_hash);
-        return req;
+        read_from_json(j, token);
+        read_from_json(j, room_token);
+        read_from_json(j, pass_hash);
     }
-    inline auto leave_room_request::to_json() const -> json_t{
+    inline auto to_json(const leave_room_request& req) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, this->type);
-        write_to_json(j, this->token);
-        write_to_json(j, this->room_token);
-        write_to_json(j, this->pass_hash);
+        write_to_json(j, req.type);
+        write_to_json(j, req.token);
+        write_to_json(j, req.room_token);
+        write_to_json(j, req.pass_hash);
         return j;
     }
 
-    inline auto leave_room_response::from_json(const json_t& j) -> leave_room_response {
+    inline leave_room_response::leave_room_response(const json_t& j) {
         ZoneScoped;
-        leave_room_response rsp;
-        read_from_json(j, rsp.code);
-        read_from_json(j, rsp.message);
-        return rsp;
+        read_from_json(j, code);
+        read_from_json(j, message);
     }
-    inline auto leave_room_response::to_json() const -> json_t{
+    inline auto to_json(const leave_room_response& rsp) -> json_t {
         ZoneScoped;
         json_t j;
-        write_to_json(j, this->type);
-        write_to_json(j, this->message);
-        write_to_json(j, this->code);
+        write_to_json(j, rsp.type);
+        write_to_json(j, rsp.message);
+        write_to_json(j, rsp.code);
         return j;
     }
 

@@ -27,36 +27,36 @@ auto server::handle_request(ge::actor_address sender, session_id id, json_t& j_)
         auto type = json::read<std::string>(j, "type");
         auto db_addr = addresses(db_worker_routes::name);
         if (type == api::register_request::type()()) {
-            auto req = api::register_request::from_json(j);
+            auto req = api::register_request(j);
             senders_[id] = sender;
             ge::send(db_addr, self(), db_worker_routes::name_process_register, self(), id, std::move(req));
         } else if (type == api::unregister_request::type()()) {
-            auto req = api::unregister_request::from_json(j);
+            auto req = api::unregister_request(j);
             senders_[id] = sender;
             pending_unregs_[id] = req;
             ge::send(db_addr, self(), db_worker_routes::name_process_unregister, self(), id, std::move(req));
         } else if (type == api::login_request::type()()) {
-            auto req = api::login_request::from_json(j);
+            auto req = api::login_request(j);
             senders_[id] = sender;
             pending_logins_[id] = req;
             ge::send(db_addr, self(), db_worker_routes::name_process_login, self(), id, std::move(req));
         } else if (type == api::unlogin_request::type()()) {
-            auto req = api::unlogin_request::from_json(j);
+            auto req = api::unlogin_request(j);
             process_unlogin_(req, id, sender);
         } else if (type == api::new_room_request::type().downcast()) {
-            auto req = api::new_room_request::from_json(j);
+            auto req = api::new_room_request(j);
             process_new_room_(req, id, sender);
         } else if (type == api::enter_room_request::type().downcast()) {
-            auto req = api::enter_room_request::from_json(j);
+            auto req = api::enter_room_request(j);
             process_enter_room_(req, id, sender);
         } else if (type == api::leave_room_request::type().downcast()) {
-            auto req = api::leave_room_request::from_json(j);
+            auto req = api::leave_room_request(j);
             process_leave_room_(req, id, sender);
         } else if (type == api::del_room_request::type().downcast()) {
-            auto req = api::del_room_request::from_json(j);
+            auto req = api::del_room_request(j);
             process_del_room_(req, id, sender);
         } else if (type == api::list_rooms_request::type().downcast()) {
-            auto req = api::list_rooms_request::from_json(j);
+            auto req = api::list_rooms_request(j);
             process_list_room_(req, id, sender);
         } else {
             //send error

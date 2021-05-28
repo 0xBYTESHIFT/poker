@@ -81,6 +81,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic -lm")
 
 add_compile_definitions(RAPIDJSON_HAS_STDSTRING=1)
 
+include_directories(${CMAKE_CURRENT_LIST_DIR})
+
 add_subdirectory(client)
 add_subdirectory(tests)
 add_subdirectory(service)

@@ -56,9 +56,9 @@ int main(int argc, char* argv[]) {
         req.nickname = nick;
         req.pass_hash = pass;
         req.email = mail;
-        const auto rsp = send(remote, req.to_json());
+        const auto rsp = send(remote, api::to_json(req));
         log.debug("reg rsp:{} code:{} er:{} er_mes:{}", rsp.text, rsp.status_code, rsp.error.code, rsp.error.message);
-        const auto reg_rsp = api::register_response::from_json(json::parse(rsp.text));
+        const auto reg_rsp = api::register_response(json::parse(rsp.text));
         if (reg_rsp.code()() != api::register_response::code_enum::OK) {
             throw std::runtime_error("register");
         }
@@ -67,9 +67,9 @@ int main(int argc, char* argv[]) {
         api::login_request req;
         req.email = mail;
         req.pass_hash = pass;
-        const auto rsp = send(remote, req.to_json());
+        const auto rsp = send(remote, api::to_json(req));
         log.debug("reg rsp:{} code:{} er:{} er_mes:{}", rsp.text, rsp.status_code, rsp.error.code, rsp.error.message);
-        const auto log_rsp = api::login_response::from_json(json::parse(rsp.text));
+        const auto log_rsp = api::login_response(json::parse(rsp.text));
         if (log_rsp.code()() != api::login_response::code_enum::OK) {
             throw std::runtime_error("login");
         }
@@ -81,9 +81,9 @@ int main(int argc, char* argv[]) {
             api::new_room_request req;
             req.token = token;
             req.pass_hash = pass;
-            const auto rsp = send(remote, req.to_json());
+            const auto rsp = send(remote, api::to_json(req));
             log.debug("reg rsp:{} code:{} er:{} er_mes:{}", rsp.text, rsp.status_code, rsp.error.code, rsp.error.message);
-            const auto room_rsp = api::new_room_response::from_json(json::parse(rsp.text));
+            const auto room_rsp = api::new_room_response(json::parse(rsp.text));
             if (room_rsp.code() != api::new_room_response::code_enum::OK) {
                 throw std::runtime_error("new room");
             }
@@ -94,9 +94,9 @@ int main(int argc, char* argv[]) {
             req.token = token;
             req.pass_hash = pass;
             req.room_token = room_token;
-            const auto rsp = send(remote, req.to_json());
+            const auto rsp = send(remote, api::to_json(req));
             log.debug("reg rsp:{} code:{} er:{} er_mes:{}", rsp.text, rsp.status_code, rsp.error.code, rsp.error.message);
-            const auto room_rsp = api::enter_room_response::from_json(json::parse(rsp.text));
+            const auto room_rsp = api::enter_room_response(json::parse(rsp.text));
             if (room_rsp.code() != api::enter_room_response::code_enum::OK) {
                 throw std::runtime_error("enter room");
             }
@@ -106,9 +106,9 @@ int main(int argc, char* argv[]) {
             req.token = token;
             req.pass_hash = pass;
             req.room_token = room_token;
-            const auto rsp = send(remote, req.to_json());
+            const auto rsp = send(remote, api::to_json(req));
             log.debug("reg rsp:{} code:{} er:{} er_mes:{}", rsp.text, rsp.status_code, rsp.error.code, rsp.error.message);
-            const auto room_rsp = api::leave_room_response::from_json(json::parse(rsp.text));
+            const auto room_rsp = api::leave_room_response(json::parse(rsp.text));
             if (room_rsp.code().downcast() != api::leave_room_response::code_enum::OK) {
                 throw std::runtime_error("leave room");
             }
@@ -118,9 +118,9 @@ int main(int argc, char* argv[]) {
             req.token = token;
             req.pass_hash = pass;
             req.room_token = room_token;
-            const auto rsp = send(remote, req.to_json());
+            const auto rsp = send(remote, api::to_json(req));
             log.debug("reg rsp:{} code:{} er:{} er_mes:{}", rsp.text, rsp.status_code, rsp.error.code, rsp.error.message);
-            const auto room_rsp = api::del_room_response::from_json(json::parse(rsp.text));
+            const auto room_rsp = api::del_room_response(json::parse(rsp.text));
             //room was deleted automatically
             if (room_rsp.code() != api::del_room_response::code_enum::ROOM_TOKEN_INCORRECT) {
                 throw std::runtime_error("del room");
@@ -131,9 +131,9 @@ int main(int argc, char* argv[]) {
         api::unregister_request req;
         req.email = mail;
         req.pass_hash = pass;
-        const auto rsp = send(remote, req.to_json());
+        const auto rsp = send(remote, api::to_json(req));
         log.debug("reg rsp:{} code:{} er:{} er_mes:{}", rsp.text, rsp.status_code, rsp.error.code, rsp.error.message);
-        const auto unreg_rsp = api::unregister_response::from_json(json::parse(rsp.text));
+        const auto unreg_rsp = api::unregister_response(json::parse(rsp.text));
         if (unreg_rsp.code() != api::unregister_response::code_enum::OK) {
             throw std::runtime_error("unreg");
         }
@@ -143,9 +143,9 @@ int main(int argc, char* argv[]) {
         req.email = mail;
         req.pass_hash = pass;
         req.token = token;
-        const auto rsp = send(remote, req.to_json());
+        const auto rsp = send(remote, api::to_json(req));
         log.debug("reg rsp:{} code:{} er:{} er_mes:{}", rsp.text, rsp.status_code, rsp.error.code, rsp.error.message);
-        const auto unlog_rsp = api::unlogin_response::from_json(json::parse(rsp.text));
+        const auto unlog_rsp = api::unlogin_response(json::parse(rsp.text));
         if (unlog_rsp.code() != api::unlogin_response::code_enum::OK) {
             throw std::runtime_error("unlogin");
         }
