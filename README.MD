@@ -31,8 +31,9 @@ cmake --build . --config Release
     - [ ] Donate
 - [ ] Rooms
     - [x] Make room
-        - [ ] Make passworded rooms
-        - [ ] Make hidden rooms
+        - [x] Make passworded rooms
+        - [x] Make hidden rooms
+        - [ ] Make named rooms
     - [x] List rooms
     - [x] Enter room
     - [x] Leave room
