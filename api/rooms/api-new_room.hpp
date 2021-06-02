@@ -9,7 +9,8 @@ namespace api {
         static const inline prop_val<std::string> type{"type", "new_room_request"};
         prop_val<std::string> token = {"token", ""};
         prop_val<std::string> pass_hash = {"pass_hash", ""};
-        //prop_val<std::string> room_pass_hash = {"room_pass_hash", ""};
+        prop_val<std::string> room_pass_hash = {"room_pass_hash", ""};
+        prop_val<bool> room_hidden = {"room_hidden", false};
 
         new_room_request() = default;
         new_room_request(const json_t& j);
@@ -36,7 +37,8 @@ namespace api {
         ZoneScoped;
         read_from_json(j, token);
         read_from_json(j, pass_hash);
-        //read_from_json(j, req.room_pass_hash);
+        read_from_json(j, room_pass_hash);
+        read_from_json(j, room_hidden);
     }
     inline auto to_json(const new_room_request& req) -> json_t {
         ZoneScoped;
@@ -44,6 +46,8 @@ namespace api {
         write_to_json(j, req.type);
         write_to_json(j, req.token);
         write_to_json(j, req.pass_hash);
+        write_to_json(j, req.room_pass_hash);
+        write_to_json(j, req.room_hidden);
         return j;
     }
 

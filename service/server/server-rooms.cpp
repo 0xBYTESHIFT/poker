@@ -1,6 +1,7 @@
 #include "server.hpp"
 
 void server::process_new_room_(const api::new_room_request& req, session_id id, ge::actor_address sender) {
+    //TODO: send errors
     ZoneScopedTraceL("server::process_new_room_");
     auto& user_token = req.token().downcast();
     auto it = check_user<api::new_room_response>(sender, req, id, user_token, server_routes::cb_name_new_room);
@@ -10,7 +11,10 @@ void server::process_new_room_(const api::new_room_request& req, session_id id, 
     auto& user_ptr = it->second;
     auto r = std::make_shared<room>();
     r->token() = gen_room_token_();
+    r->pass_hash() = req.pass_hash();
+    r->hidden() = req.room_hidden();
     rooms_[r->token()] = r;
+
     api::new_room_response rsp;
     rsp.code() = api::new_room_response::code_enum::OK;
     rsp.message() = "ok";
@@ -19,6 +23,7 @@ void server::process_new_room_(const api::new_room_request& req, session_id id, 
 }
 
 void server::process_enter_room_(const api::enter_room_request& req, session_id id, ge::actor_address sender) {
+    //TODO: send errors
     ZoneScopedTraceL("server::process_enter_room_");
     auto user_token = req.token().downcast();
     auto it = check_user<api::enter_room_response>(sender, req, id, user_token, server_routes::cb_name_enter_room);
@@ -31,6 +36,9 @@ void server::process_enter_room_(const api::enter_room_request& req, session_id 
     if (room_it == rooms_.end()) {
         rsp.code() = api::enter_room_response::code_enum::ROOM_TOKEN_INCORRECT;
         rsp.message() = fmt::format("unknown room token:{}", req.room_token().downcast());
+    } else if (req.pass_hash()() != room_it->second->pass_hash()) {
+        rsp.code() = api::enter_room_response::code_enum::ROOM_PASS_INCORRECT;
+        rsp.message() = "incorrect room pass";
     } else {
         rsp.code() = api::enter_room_response::code_enum::OK;
         rsp.message() = "ok";
@@ -117,6 +125,9 @@ void server::process_list_room_(const api::list_rooms_request& req, session_id i
     auto& rooms_data = rsp.rooms_data().downcast();
     rooms_data.reserve(rooms_.size());
     for (auto& [r_token, r_ptr] : rooms_) {
+        if (r_ptr->hidden()) {
+            continue;
+        }
         decltype(rsp)::room_data_t data;
         data.name = "unnamed"; //FIXME:
         data.token = r_token;

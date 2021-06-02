@@ -1,2 +1,8 @@
 tracy
 build
+.cache
+.vscode
+*.vim
+logs
+tags
+compile_commands.json

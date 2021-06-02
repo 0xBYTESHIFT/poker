@@ -10,10 +10,9 @@ namespace api {
         static const inline prop_val<str_t> type{"type", "poker_start_request"};
         prop_val<str_t> token = {"token", ""};
         prop_val<str_t> pass_hash = {"pass_hash", ""};
-        prop_val<str_t> room_token = {"room_token", ""};
 
-        static auto from_json(const json_t& j) -> leave_room_request;
-        auto to_json() const -> str_t;
+        poker_start_request(const json_t& j);
+        auto to_json(const poker_start_request& req) -> json_t;
     };
 
     struct poker_start_response {
@@ -29,60 +28,35 @@ namespace api {
         prop_val<code_enum> code = {"code", code_enum::ETC};
         prop_val<str_t> message = {"message", ""};
 
-        static auto from_json(const json_t& j) -> leave_room_response;
-        auto to_json() const -> str_t;
+        poker_start_response(const json_t& j);
+        auto to_json(const poker_start_response& rsp) -> json_t;
     };
 
-    inline auto poker_start_request::from_json(const json_t& j) -> poker_start_request {
+    inline poker_start_request::poker_start_request(const json_t& j) {
         ZoneScoped;
-        poker_start_request r;
-        r.token() = j.value_as<str_t>(r.token().name());
-        r.room_token() = j.value_as<str_t>(r.room_token().name());
-        r.pass_hash() = j.value_as<str_t>(r.pass_hash().name());
-        return r;
+        read_from_json(j, token);
+        read_from_json(j, pass_hash);
     }
-    inline auto poker_start_request::to_json() const -> str_t {
+    inline auto to_json(const poker_start_request& req) -> json_t {
         ZoneScoped;
-        str_t result;
-        rapidjson::StringBuffer sb;
-        rapidjson::PrettyWriter<decltype(sb)> pw(sb);
-
-        pw.StartObject();
-        write_to_json(pw, this->type);
-        write_to_json(pw, this->token);
-        write_to_json(pw, this->room_token);
-        write_to_json(pw, this->pass_hash);
-        pw.EndObject();
-
-        result = sb.GetString();
-        return result;
+        json_t j;
+        write_to_json(j, req.type);
+        write_to_json(j, req.token);
+        write_to_json(j, req.pass_hash);
+        return j;
     }
 
-    /*==============================================================*/
-    inline auto poker_start_response::from_json(const json_t& j) -> poker_start_request {
+    inline poker_start_response::poker_start_response(const json_t& j) {
         ZoneScoped;
-        poker_start_response r;
-        auto temp = j.value_as<std::size_t>(r.code().name());
-        r.code() = static_cast<leave_room_response::code_enum>(temp);
-        r.message() = j.value_as<str_t>(r.message().name());
-        return r;
+        read_from_json(j, code);
+        read_from_json(j, message);
     }
-    inline auto poker_start_response::to_json() const -> str_t {
+    inline auto to_json(const poker_start_response& rsp) -> json_t {
         ZoneScoped;
-        str_t result;
-        rapidjson::StringBuffer sb;
-        rapidjson::PrettyWriter<decltype(sb)> pw(sb);
-
-        pw.StartObject();
-        write_to_json(pw, this->type);
-        write_to_json(pw, this->message);
-
-        pw.String(this->code().name());
-        pw.Int64(size_t(this->code().downcast()));
-        pw.EndObject();
-
-        result = sb.GetString();
-        return result;
+        json_t j;
+        write_to_json(j, rsp.type);
+        write_to_json(j, rsp.code);
+        write_to_json(j, rsp.message);
+        return j;
     }
-
 }; // namespace api

@@ -10,6 +10,7 @@ namespace api {
         prop_val<std::string> token = {"token", ""};
         prop_val<std::string> pass_hash = {"pass_hash", ""};
         prop_val<std::string> room_token = {"room_token", ""};
+        prop_val<std::string> room_pass_hash = {"room_pass_hash", ""};
 
         enter_room_request() = default;
         enter_room_request(const json_t& j);
@@ -21,6 +22,7 @@ namespace api {
             TOKEN_INCORRECT,
             PASS_INCORRECT,
             ROOM_TOKEN_INCORRECT,
+            ROOM_PASS_INCORRECT,
             ETC
         };
         static const inline prop_val<std::string> type{"type", "enter_room_response"};
@@ -36,14 +38,16 @@ namespace api {
         read_from_json(j, token);
         read_from_json(j, pass_hash);
         read_from_json(j, room_token);
+        read_from_json(j, room_pass_hash);
     }
     inline auto to_json(const enter_room_request& req) -> json_t {
         ZoneScoped;
         json_t j;
         write_to_json(j, req.type);
         write_to_json(j, req.token);
-        write_to_json(j, req.room_token);
         write_to_json(j, req.pass_hash);
+        write_to_json(j, req.room_token);
+        write_to_json(j, req.room_pass_hash);
         return j;
     }
 

@@ -43,23 +43,23 @@ namespace api {
     using prop_val = property<val_t<T>>;
 
     template<class T>
-    void read_from_json(const json_t& j, prop_val<T>& val) requires std::is_convertible_v<T, std::string_view> {
-        val()() = boost::json::value_to<std::string>(j.at(val().name()));
-    }
-
-    template<class T>
-    void read_from_json(const json_t& j, prop_val<T>& val) requires std::is_floating_point_v<T> {
-        val()() = boost::json::value_to<double>(j.at(val().name()));
-    }
-
-    template<class T>
-    void read_from_json(const json_t& j, prop_val<T>& val) requires std::is_integral_v<T> {
-        val()() = boost::json::value_to<int>(j.at(val().name()));
-    }
-
-    template<class T>
-    void read_from_json(const json_t& j, prop_val<T>& val) {
-        val()() = static_cast<T>(boost::json::value_to<int>(j.at(val().name())));
+    void read_from_json(const json_t& j, prop_val<T>& val, bool is_optional = false) {
+        static const auto prefix = "read_from_json";
+        if (!is_optional && j.find(val().name()) == j.end()) {
+            auto mes = fmt::format("{} no member '{}' in json", prefix, val().name());
+            throw std::runtime_error(mes);
+        }
+        if constexpr (std::is_convertible_v<T, std::string_view>) {
+            val()() = boost::json::value_to<std::string>(j.at(val().name()));
+        } else if constexpr (std::is_floating_point_v<T>) {
+            val()() = boost::json::value_to<double>(j.at(val().name()));
+        } else if constexpr (std::is_integral_v<T>) {
+            val()() = boost::json::value_to<int>(j.at(val().name()));
+        } else if constexpr (std::is_convertible_v<T, bool>) {
+            val()() = boost::json::value_to<bool>(j.at(val().name()));
+        } else {
+            val()() = static_cast<T>(boost::json::value_to<int>(j.at(val().name())));
+        }
     }
 
     template<class T>
@@ -72,10 +72,12 @@ namespace api {
         j[val().name()] = static_cast<int>(val()());
     }
 
+    /*
     template<class T>
     void extract(const boost::json::object& obj, T& t, std::string_view key) {
         //t = value_to<T>(obj.at(key));
     }
+    */
 
     /*
     template<class T>
